@@ -1,0 +1,30 @@
+name: Deploy App
+on:
+    push:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+            
+            - name: Setup Node
+              uses: actions/setup-java@v4
+              with:
+                distribution: 'temurin'
+                java-version: '21'
+
+            - name: Build Project
+              run: mvn clean package -DskipTests
+
+            - name: Login Dockerhub
+              run: docker login -u ${{secrets.DOCKERHUB_USERNAME}} -p ${{secrets.DOCKERHUB_PASSWORD}}
+
+            - name: Build docker image
+              run: docker build -t augustod3v/api-lazaros-test .
+            
+            - name: Push image to Dockerhub
+              run: docker push augustod3v/api-lazaros-test
+            
